@@ -1,3 +1,4 @@
 allowBuilds:
-  esbuild: set this to true or false
-  spawn-sync: set this to true or false
+  core-js: false
+  esbuild: false
+  spawn-sync: false
