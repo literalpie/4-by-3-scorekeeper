@@ -5,7 +5,7 @@ import type {
 import { BrowserOAuthClient } from '@atproto/oauth-client-browser';
 import type { Agent } from '@atproto/api';
 
-const GITHUB_USER = 'your-username';
+const GITHUB_USER = 'literalpie';
 const REPO = '4-by-3-scorekeeper';
 
 export const CALLBACK_URL = `https://${GITHUB_USER}.github.io/${REPO}/callback.html`;
