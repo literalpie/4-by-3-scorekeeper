@@ -1,5 +1,5 @@
 import { createSignal, onMount } from 'solid-js';
-import { createClient, type OAuthSession } from '@/lib/auth';
+import { createClient, CALLBACK_URL, type OAuthSession } from '@/lib/auth';
 import './App.css';
 
 function App() {
@@ -25,12 +25,50 @@ function App() {
     setLoading(true);
     setError('');
     const client = createClient();
+    let tabId: number | undefined;
+    const abort = new AbortController();
+    const authTimeout = setTimeout(() => abort.abort(), 20000);
     try {
-      const s = await client.signIn(handle(), { display: 'popup' });
-      setSession(s);
+      console.log('[auth] authorize:', handle());
+      const authUrl = await client.authorize(handle(), { signal: abort.signal });
+      clearTimeout(authTimeout);
+      console.log('[auth] got authUrl:', authUrl.href);
+      const tab = await browser.tabs.create({ url: authUrl.href });
+      tabId = tab.id;
+      console.log('[auth] opened tab:', tabId);
+      const callbackUrl = CALLBACK_URL;
+      const result = await new Promise<{ session: OAuthSession }>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('Sign in timed out waiting for callback'));
+        }, 5 * 60 * 1000);
+        const listener = (id: number, changeInfo: { url?: string }) => {
+          if (id !== tab.id) return;
+          if (changeInfo.url) console.log('[auth] tab url:', changeInfo.url);
+          if (!changeInfo.url?.startsWith(callbackUrl)) return;
+          console.log('[auth] callback detected');
+          cleanup();
+          browser.tabs.remove(id);
+          const url = new URL(changeInfo.url);
+          const params = new URLSearchParams(url.hash.slice(1) || url.search.slice(1));
+          client.callback(params).then(resolve).catch(reject);
+        };
+        const cleanup = () => {
+          clearTimeout(timeout);
+          browser.tabs.onUpdated.removeListener(listener);
+        };
+        browser.tabs.onUpdated.addListener(listener);
+      });
+      console.log('[auth] success:', result.session.did);
+      setSession(result.session);
     } catch (err) {
-      if (err instanceof Error && err.message !== 'User navigated back') {
+      clearTimeout(authTimeout);
+      if (tabId) browser.tabs.remove(tabId).catch(() => {});
+      console.error('[auth] error:', err);
+      if (err instanceof Error) {
         setError(err.message);
+      } else {
+        setError('Unknown error during sign in');
       }
     } finally {
       setLoading(false);
@@ -72,7 +110,7 @@ function App() {
               class="input"
             />
             <button type="submit" disabled={loading() || !handle()} class="btn btn-primary">
-              {loading() ? 'Signing in...' : 'Sign in'}
+              {loading() ? 'A new tab will open for sign in...' : 'Sign in'}
             </button>
           </form>
           {error() && <p class="error">{error()}</p>}

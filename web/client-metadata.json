@@ -1,8 +1,9 @@
 {
   "client_id": "https://literalpie.github.io/4-by-3-scorekeeper/client-metadata.json",
   "client_name": "4-by-3 Scorekeeper",
+  "client_uri": "https://literalpie.github.io/4-by-3-scorekeeper/",
   "redirect_uris": [
-    "chrome-extension://becoahdgbkpakdikpillggabhgpkppkc/callback.html"
+    "https://literalpie.github.io/4-by-3-scorekeeper/callback.html"
   ],
   "scope": "atproto",
   "grant_types": ["authorization_code", "refresh_token"],
