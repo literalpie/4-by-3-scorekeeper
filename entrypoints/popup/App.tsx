@@ -1,123 +1,73 @@
-import { createSignal, onMount } from 'solid-js';
-import { createClient, CALLBACK_URL, type OAuthSession } from '@/lib/auth';
+import { createSignal, onCleanup } from 'solid-js';
 import './App.css';
 
-function App() {
-  const [session, setSession] = createSignal<OAuthSession | null>(null);
+export default function App() {
   const [handle, setHandle] = createSignal('');
-  const [loading, setLoading] = createSignal(false);
+  const [session, setSession] = createSignal<{ handle: string; did: string } | null>(null);
   const [error, setError] = createSignal('');
+  const [loading, setLoading] = createSignal(false);
 
-  onMount(async () => {
-    const client = createClient();
-    try {
-      const result = await client.init();
-      if (result?.session) {
-        setSession(result.session);
-      }
-    } catch {
-      // no session
-    }
-  });
-
-  async function signIn() {
-    if (!handle()) return;
-    setLoading(true);
-    setError('');
-    const client = createClient();
-    let tabId: number | undefined;
-    const abort = new AbortController();
-    const authTimeout = setTimeout(() => abort.abort(), 20000);
-    try {
-      console.log('[auth] authorize:', handle());
-      const authUrl = await client.authorize(handle(), { signal: abort.signal });
-      clearTimeout(authTimeout);
-      console.log('[auth] got authUrl:', authUrl.href);
-      const tab = await browser.tabs.create({ url: authUrl.href });
-      tabId = tab.id;
-      console.log('[auth] opened tab:', tabId);
-      const callbackUrl = CALLBACK_URL;
-      const result = await new Promise<{ session: OAuthSession }>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          cleanup();
-          reject(new Error('Sign in timed out waiting for callback'));
-        }, 5 * 60 * 1000);
-        const listener = (id: number, changeInfo: { url?: string }) => {
-          if (id !== tab.id) return;
-          if (changeInfo.url) console.log('[auth] tab url:', changeInfo.url);
-          if (!changeInfo.url?.startsWith(callbackUrl)) return;
-          console.log('[auth] callback detected');
-          cleanup();
-          browser.tabs.remove(id);
-          const url = new URL(changeInfo.url);
-          const params = new URLSearchParams(url.hash.slice(1) || url.search.slice(1));
-          client.callback(params).then(resolve).catch(reject);
-        };
-        const cleanup = () => {
-          clearTimeout(timeout);
-          browser.tabs.onUpdated.removeListener(listener);
-        };
-        browser.tabs.onUpdated.addListener(listener);
-      });
-      console.log('[auth] success:', result.session.did);
-      setSession(result.session);
-    } catch (err) {
-      clearTimeout(authTimeout);
-      if (tabId) browser.tabs.remove(tabId).catch(() => {});
-      console.error('[auth] error:', err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Unknown error during sign in');
-      }
-    } finally {
+  const onStorageChanged = (changes: Record<string, any>) => {
+    if (changes.authResult) {
+      setSession(changes.authResult.newValue || null);
       setLoading(false);
     }
-  }
+  };
+  browser.storage.onChanged.addListener(onStorageChanged);
+  onCleanup(() => browser.storage.onChanged.removeListener(onStorageChanged));
 
-  async function signOut() {
+  browser.storage.local.get('authResult').then((r) => {
+    if (r.authResult) setSession(r.authResult as any);
+  });
+
+  const signIn = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await browser.runtime.sendMessage({ type: 'SIGN_IN', handle: handle() });
+    } catch (e: any) {
+      setLoading(false);
+      setError(e.message);
+    }
+  };
+
+  const signOut = async () => {
     const s = session();
     if (!s) return;
-    await s.signOut();
+    try {
+      await browser.runtime.sendMessage({ type: 'SIGN_OUT', did: s.did });
+    } catch {}
     setSession(null);
-  }
+  };
 
   return (
-    <div class="app">
+    <div class="container">
       {session() ? (
-        <div class="signed-in">
-          <p class="did">{session()!.did}</p>
-          <button onClick={signOut} class="btn btn-outline">
-            Sign out
-          </button>
-        </div>
+        <>
+          <h1>Signed in</h1>
+          <p>@{session()!.handle}</p>
+          <button onClick={signOut}>Sign out</button>
+        </>
       ) : (
-        <div class="sign-in">
-          <h1 class="title">4-by-3 Scorekeeper</h1>
-          <p class="subtitle">Sign in with your Bluesky handle</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              signIn();
-            }}
-          >
-            <input
-              type="text"
-              placeholder="handle.bsky.social"
-              value={handle()}
-              onInput={(e) => setHandle(e.currentTarget.value)}
-              disabled={loading()}
-              class="input"
-            />
-            <button type="submit" disabled={loading() || !handle()} class="btn btn-primary">
-              {loading() ? 'A new tab will open for sign in...' : 'Sign in'}
-            </button>
-          </form>
+        <>
+          <h1>Sign in to AT Protocol</h1>
+          <input
+            value={handle()}
+            onInput={(e) => setHandle(e.currentTarget.value)}
+            placeholder="alice.bsky.social"
+            disabled={loading()}
+          />
+          <button onClick={signIn} disabled={loading() || !handle()}>
+            {loading() ? 'Signing in...' : 'Sign in'}
+          </button>
           {error() && <p class="error">{error()}</p>}
-        </div>
+        </>
       )}
+
+      <hr />
+      <button onClick={() => browser.tabs.create({ url: browser.runtime.getURL('/test-page.html' as any) })}>
+        Open Test Page
+      </button>
     </div>
   );
 }
-
-export default App;

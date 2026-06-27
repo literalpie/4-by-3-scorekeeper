@@ -5,19 +5,18 @@ import type {
 import { BrowserOAuthClient } from '@atproto/oauth-client-browser';
 import type { Agent } from '@atproto/api';
 
-const GITHUB_USER = 'literalpie';
-const REPO = '4-by-3-scorekeeper';
+const URL_BASE = `https://literalpie.github.io/4-by-3-scorekeeper`;
 
-export const CALLBACK_URL = `https://${GITHUB_USER}.github.io/${REPO}/callback.html`;
+export const CALLBACK_URL = `${URL_BASE}/callback.html`;
 
-export function getAuthOptions(): BrowserOAuthClientOptions {
-  const clientId = `https://${GITHUB_USER}.github.io/${REPO}/client-metadata.json`;
-
-  return {
+export function createClient(): BrowserOAuthClient {
+  const clientId = `${URL_BASE}/client-metadata.json`;
+  
+  const authOptions: BrowserOAuthClientOptions = {
     clientMetadata: {
       client_id: clientId,
       client_name: '4-by-3 Scorekeeper',
-      client_uri: `https://${GITHUB_USER}.github.io/${REPO}/`,
+      client_uri: `${URL_BASE}/`,
       redirect_uris: [CALLBACK_URL] as [string, ...string[]],
       scope: 'atproto',
       grant_types: ['authorization_code', 'refresh_token'],
@@ -28,10 +27,7 @@ export function getAuthOptions(): BrowserOAuthClientOptions {
     },
     handleResolver: 'https://bsky.social',
   };
-}
-
-export function createClient(): BrowserOAuthClient {
-  return new BrowserOAuthClient(getAuthOptions());
+  return new BrowserOAuthClient(authOptions);
 }
 
 export type { OAuthSession, Agent };
