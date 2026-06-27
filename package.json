@@ -1,6 +1,6 @@
 {
-  "name": "wxt-solid-starter",
-  "description": "manifest.json description",
+  "name": "at-proto-scorekeeper",
+  "description": "Save game scores to AT Protocol",
   "private": true,
   "version": "0.0.0",
   "type": "module",

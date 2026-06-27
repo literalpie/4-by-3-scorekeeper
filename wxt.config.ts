@@ -4,7 +4,9 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   modules: ['@wxt-dev/module-solid'],
   manifest: {
-    permissions: ['storage'],
-    host_permissions: ['https://*.github.io/*'],
+    name: 'AT Proto Score Keeper',
+    description: 'Save game scores to AT Protocol',
+    permissions: ['storage', 'activeTab'],
+    host_permissions: ['https://*.github.io/*', 'https://www.hankgreen.com/*'],
   },
 });

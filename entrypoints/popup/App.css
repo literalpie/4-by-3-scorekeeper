@@ -4,8 +4,198 @@
   padding: 1.5rem;
 }
 
+h1 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+
+.app-header {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 12px 0;
+}
+
+button.primary {
+  width: 100%;
+  padding: 8px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button.primary:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
 .error {
   color: #dc2626;
   font-size: 0.8125rem;
-  margin: 0;
+  margin: 8px 0 0;
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.handle {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.score-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.opt {
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.field input,
+.field textarea {
+  padding: 7px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+/* ---- preview ---- */
+
+.preview-score {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 12px 0;
+}
+
+.preview-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8125rem;
+  margin: 4px 0;
+}
+
+.preview-label {
+  color: #64748b;
+}
+
+.preview-value {
+  text-align: right;
+  overflow-wrap: break-word;
+  max-width: 60%;
+}
+
+.preview-achievement {
+  font-size: 0.8125rem;
+  padding: 2px 0;
+}
+
+.delta-pos {
+  color: #16a34a;
+}
+
+.delta-neg {
+  color: #dc2626;
+}
+
+.preview-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin: 8px 0 4px;
+}
+
+.past-badge {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.success {
+  text-align: center;
+}
+
+.inline-signin {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inline-signin input {
+  padding: 7px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.inline-signin input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+button.secondary {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: #3b82f6;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin-top: 6px;
 }
