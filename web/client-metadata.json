@@ -5,7 +5,7 @@
   "redirect_uris": [
     "https://literalpie.github.io/4-by-3-scorekeeper/callback.html"
   ],
-  "scope": "atproto",
+  "scope": "atproto repo:com.literalpie.gamescore",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
   "token_endpoint_auth_method": "none",

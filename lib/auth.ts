@@ -18,7 +18,7 @@ export function createClient(): BrowserOAuthClient {
       client_name: '4-by-3 Scorekeeper',
       client_uri: `${URL_BASE}/`,
       redirect_uris: [CALLBACK_URL] as [string, ...string[]],
-      scope: 'atproto',
+      scope: 'atproto repo:com.literalpie.gamescore',
       grant_types: ['authorization_code', 'refresh_token'],
       response_types: ['code'],
       token_endpoint_auth_method: 'none',
